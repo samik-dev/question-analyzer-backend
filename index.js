@@ -8,7 +8,21 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+
+// Configure CORS to allow requests only from https://www.testpaper.org
+app.use(cors({
+    origin: 'https://www.testpaper.org',
+    methods: ['POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type'],
+}));
+
+// Handle preflight OPTIONS request
+app.options('/fetch-html', cors({
+    origin: 'https://www.testpaper.org',
+    methods: ['POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type'],
+}));
+
 app.use(express.json());
 
 // Rate Limiting to prevent abuse

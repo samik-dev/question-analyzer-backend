@@ -16,7 +16,7 @@ app.use(cors({
     allowedHeaders: ['Content-Type'],
 }));
 
-// Handle preflight OPTIONS request
+// Handle preflight OPTIONS request for /fetch-html
 app.options('/fetch-html', cors({
     origin: 'https://www.testpaper.org',
     methods: ['POST', 'OPTIONS'],
@@ -44,7 +44,13 @@ app.post('/fetch-html', async (req, res) => {
 
     // Restrict to ssc.digialm.com domain
     const allowedDomain = 'ssc.digialm.com';
-    const hostname = new URL(url).hostname;
+    let hostname;
+    try {
+        hostname = new URL(url).hostname;
+    } catch (error) {
+        return res.status(400).json({ error: 'Invalid URL format.' });
+    }
+
     if (hostname !== allowedDomain) {
         return res.status(403).json({ error: `Fetching from ${hostname} is not allowed.` });
     }
@@ -61,6 +67,12 @@ app.post('/fetch-html', async (req, res) => {
         console.error('Error fetching URL:', error);
         res.status(500).json({ error: 'An error occurred while fetching the URL.' });
     }
+});
+
+// Global Error Handling Middleware
+app.use((err, req, res, next) => {
+    console.error('Unhandled Error:', err);
+    res.status(500).json({ error: 'Internal Server Error.' });
 });
 
 // Start the server
